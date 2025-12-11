@@ -1,1 +1,7 @@
-docker exec -it gitlab grep 'Password:' /etc/gitlab/initial_root_password
+        external_url 'http://10.0.1.14'      
+        gitlab_rails['gitlab_shell_ssh_port'] = 1822 
+        gitlab_rails['backup_path'] = '/var/opt/gitlab/backups'
+        gitlab_rails['backup_keep_time'] = 604800 # 7 days
+        ## Enable Registry
+        gitlab_rails['registry_enabled'] = true
+        registry_external_url 'http://10.0.1.14:5050'
