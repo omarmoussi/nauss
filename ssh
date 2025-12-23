@@ -38,6 +38,31 @@ php artisan config:clear
 php artisan config:cache
 update permission
 
+
+
+
+######
+rm -f /etc/apt/sources.list.d/ondrej-php.list
+rm -f /usr/share/keyrings/ondrej-php.gpg
+
+curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x4F4EA0AAE5267A6C" \
+| gpg --dearmor \
+| sudo tee /usr/share/keyrings/ondrej-php.gpg > /dev/null
+
+ls -l /usr/share/keyrings/ondrej-php.gpg
+
+
+CODENAME=$(lsb_release -sc)
+
+echo "deb [signed-by=/usr/share/keyrings/ondrej-php.gpg] \
+https://ppa.launchpadcontent.net/ondrej/php/ubuntu \
+$CODENAME main" \
+| sudo tee /etc/apt/sources.list.d/ondrej-php.list
+
+
+sudo apt update
+
+
 sudo chown -R www-data:www-data /var/www/html/sabayabackend
 sudo find  /var/www/html/sabayabackend -type f -exec chmod 664 {} \;   
 sudo find  /var/www/html/sabayabackend -type d -exec chmod 775 {} \;
