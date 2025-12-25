@@ -83,3 +83,68 @@ sudo chmod 644 /usr/share/keyrings/redis-archive-keyring.gpg
 echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
 sudo apt-get update
 sudo apt-get install redis
+
+
+
+
+# Exemple pour Ubuntu/Debian
+wget https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+sudo dpkg -i percona-release_latest.generic_all.deb
+sudo percona-release setup pxc80
+sudo apt update
+sudo apt install percona-xtradb-cluster
+
+
+
+matser 
+[mysqld]
+server-id=2   
+datadir=/var/lib/mysql
+socket=/var/run/mysqld/mysqld.sock
+log-error=/var/log/mysql/error.log
+bind-address = 0.0.0.0
+######## wsrep ###############
+wsrep_provider=/usr/lib/libgalera_smm.so
+pxc-encrypt-cluster-traffic=OFF
+# Liste identique au Nœud 1
+wsrep_cluster_address=gcomm://192.168.1.10,192.168.1.11,192.168.1.12
+
+binlog_format=ROW
+default_storage_engine=InnoDB
+wsrep_slave_threads=8
+innodb_autoinc_lock_mode=2
+
+# IP locale de ce nœud
+wsrep_node_address=192.168.1.11
+wsrep_cluster_name=mon_cluster_percona
+wsrep_node_name=node-2
+
+pxc_strict_mode=ENFORCING
+wsrep_sst_method=xtrabackup-v2
+
+
+
+slave 
+[mysqld]
+server-id=1
+datadir=/var/lib/mysql
+socket=/var/run/mysqld/mysqld.sock
+log-error=/var/log/mysql/error.log
+pid-file=/var/run/mysqld/mysqld.pid
+bind-address = 0.0.0.0
+
+######## wsrep (Galera) ###############
+wsrep_provider=/usr/lib/libgalera_smm.so
+wsrep_cluster_name=mon_cluster_percona
+wsrep_cluster_address=gcomm://192.168.1.10,192.168.1.11,192.168.1.12
+wsrep_node_address=192.168.1.10
+wsrep_node_name=node-1
+
+binlog_format=ROW
+default_storage_engine=InnoDB
+innodb_autoinc_lock_mode=2
+
+# Désactivation SSL pour résoudre l'erreur de certificat
+pxc-encrypt-cluster-traffic=OFF
+pxc_strict_mode=ENFORCING
+wsrep_sst_method=xtrabackup-v2
