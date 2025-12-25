@@ -153,3 +153,39 @@ sudo update-alternatives --remove-all mysql
 sudo update-alternatives --remove-all my.cnf
 sudo apt-get update
 sudo apt-get install percona-xtradb-cluster
+global
+    log /dev/log local0
+    log /dev/log local1 notice
+    daemon
+    maxconn 4096
+    user haproxy
+    group haproxy
+
+defaults
+    log     global
+    mode    tcp
+    option  tcplog
+    option  dontlognull
+    timeout connect 10s
+    timeout client  1m
+    timeout server  1m
+
+# =========================
+# FRONTEND MYSQL
+# =========================
+frontend mysql_front
+    bind *:3306
+    mode tcp
+    default_backend mysql_cluster
+
+# =========================
+# BACKEND MYSQL GALERA
+# =========================
+backend mysql_cluster
+    mode tcp
+    balance leastconn
+    option mysql-check user haproxy
+
+    server db1 10.0.1.6:3306 check inter 2s rise 2 fall 3
+    server db2 10.0.1.7:3306 check inter 2s rise 2 fall 3
+    server db3 10.0.1.8:3306 check inter 2s rise 2 fall 3
