@@ -235,3 +235,47 @@ GRANT ALL PRIVILEGES ON *.* TO 'haproxy_user'@'%' WITH GRANT OPTION;
 
 -- Appliquer les changements
 FLUSH PRIVILEGES;
+*******
+global
+    log /dev/log local0
+    log /dev/log local1 notice
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin
+    user haproxy
+    group haproxy
+    daemon
+
+defaults
+    log     global
+    mode    tcp
+    option  tcplog
+    timeout connect 5s
+    timeout client  50s
+    timeout server  50s
+
+# --- Interface de monitoring (http://10.0.1.9:8080) ---
+listen stats
+    bind *:8080
+    mode http
+    stats enable
+    stats uri /
+    stats refresh 5s
+    stats auth admin:OmarPassword2025 # Changez le mot de passe ici
+
+# --- Point d'entrée pour vos Applications Web ---
+frontend mysql_frontend
+    bind *:3306
+    mode tcp
+    default_backend mysql_nodes
+
+backend mysql_nodes
+    mode tcp
+    balance roundrobin
+    
+    # Vérification de santé MySQL
+    option mysql-check user haproxy_check
+    
+    # Vos 3 serveurs Percona
+    server node1 192.168.1.10:3306 check
+    server node2 192.168.1.11:3306 check
+    server node3 192.168.1.12:3306 check
