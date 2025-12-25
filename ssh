@@ -189,3 +189,41 @@ backend mysql_cluster
     server db1 10.0.1.6:3306 check inter 2s rise 2 fall 3
     server db2 10.0.1.7:3306 check inter 2s rise 2 fall 3
     server db3 10.0.1.8:3306 check inter 2s rise 2 fall 3
+
+
+
+global
+    log /dev/log local0
+    log /dev/log local1 notice
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin
+    user haproxy
+    group haproxy
+    daemon
+
+defaults
+    log     global
+    mode    tcp
+    option  tcplog
+    timeout connect 5000ms
+    timeout client  50000ms
+    timeout server  50000ms
+
+# --- Page de statistiques (Optionnel mais très utile) ---
+listen stats
+    bind *:8080
+    mode http
+    stats enable
+    stats uri /
+    stats refresh 10s
+    stats auth admin:votre_mot_de_passe
+
+# --- Configuration du Cluster MySQL ---
+listen mysql_cluster
+    bind *:3306
+    mode tcp
+    option mysql-check user haproxy_check
+    balance roundrobin
+    server node1 192.168.1.10:3306 check
+    server node2 192.168.1.11:3306 check
+    server node3 192.168.1.12:3306 check
