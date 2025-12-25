@@ -227,3 +227,11 @@ listen mysql_cluster
     server node1 192.168.1.10:3306 check
     server node2 192.168.1.11:3306 check
     server node3 192.168.1.12:3306 check
+-- Création de l'utilisateur 'haproxy_user' capable de se connecter de n'importe où
+CREATE USER 'haproxy_user'@'%' IDENTIFIED BY 'votre_mot_de_passe_fort';
+
+-- Accorder les privilèges nécessaires (ajustez selon vos besoins, ici accès total)
+GRANT ALL PRIVILEGES ON *.* TO 'haproxy_user'@'%' WITH GRANT OPTION;
+
+-- Appliquer les changements
+FLUSH PRIVILEGES;
