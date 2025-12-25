@@ -149,3 +149,7 @@ pxc-encrypt-cluster-traffic=OFF
 pxc_strict_mode=ENFORCING
 wsrep_sst_method=xtrabackup-v2
 https://eu.onetimesecret.com/secret/63hsxrrap968wcph6zl8jidj0zx6xu4
+sudo update-alternatives --remove-all mysql
+sudo update-alternatives --remove-all my.cnf
+sudo apt-get update
+sudo apt-get install percona-xtradb-cluster
